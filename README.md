@@ -4,7 +4,7 @@ An end-to-end logistics platform featuring an intelligent driver-routing algorit
 
 ## Apps Demo
 * **Admin Dashboard (Live Web):** [Link to your Azure VM IP]
-* **Customer App (Android):** [Download CustomerApp.apk](./releases/download/v1/CustomerApp.apk)
+* **Customer App (Android):** [Download CustomerApp.apk](https://github.com/kkkable/mobile-based-logistics-system/releases/download/v1/Admin.Web.App.demo.txt)
 * **Driver App (Android):** [Download DriverApp.apk](./releases/DriverApp.apk)
 
 ### Test Account
