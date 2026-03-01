@@ -3,9 +3,9 @@
 An end-to-end logistics platform featuring an intelligent driver-routing algorithm, live tracking, and a comprehensive admin dashboard.
 
 ## Apps Demo
-* **Admin Dashboard (Live Web):** [Link to your Azure VM IP]
-* **Customer App (Android):** [Download CustomerApp.apk](https://github.com/kkkable/mobile-based-logistics-system/releases/download/v1/Admin.Web.App.demo.txt)
-* **Driver App (Android):** [Download DriverApp.apk](./releases/DriverApp.apk)
+* **Admin Dashboard (Live Web):** [http://20.2.65.194:3000/]
+* **Customer App (Android):** [Download CustomerApp.apk](https://github.com/kkkable/mobile-based-logistics-system/releases/download/v1/CustomerApp.apk)
+* **Driver App (Android):** [Download DriverApp.apk](https://github.com/kkkable/mobile-based-logistics-system/releases/download/v1/DriverApp.apk)
 
 ### Test Account
 * **Admin:** username: `a1` / password: `1`
