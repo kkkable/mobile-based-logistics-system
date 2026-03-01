@@ -3,7 +3,7 @@
 An end-to-end logistics platform featuring an intelligent driver-routing algorithm, live tracking, and a comprehensive admin dashboard.
 
 ## Apps Demo
-* **Admin Dashboard (Live Web):** [http://20.2.65.194:3000/]
+* **Admin Dashboard (Live Web):** [Web Demo](http://20.2.65.194:3000/)
 * **Customer App (Android):** [Download CustomerApp.apk](https://github.com/kkkable/mobile-based-logistics-system/releases/download/v1/CustomerApp.apk)
 * **Driver App (Android):** [Download DriverApp.apk](https://github.com/kkkable/mobile-based-logistics-system/releases/download/v1/DriverApp.apk)
 
@@ -26,12 +26,43 @@ An end-to-end logistics platform featuring an intelligent driver-routing algorit
 
 ## How to run locally (For Developers)
 **Backend:**
-Edit the .env file
+Edit the .env file:
+API_KEY=`google map API key`
+PORT=`8080` (Default)
+FIREBASE_KEY_PATH=`firebase key` (firestore)
+AZURE_STORAGE_CONNECTION_STRING=`Azure blob storage` (it is optional or it will store in local "uploads" folder in backend)
+ETA_UPDATE_INTERVAL_SECONDS=`900` (default)
+JWT_SECRET=  (Optional)
+
+Start Backend:
 1. cd `backend`
 2. `npm install`
 3. `node server.js`
 
-**Flutter Apps:**
-1. cd `customer_app`, `driver_app`, or `admin_app`
+**Flutter Apps (Android):**
+Edit the .env file:
+BASE_URL: `http://{backend IP}:{Port}` or `http://10.0.2.2:{Port}`
+
+Start App:
+1. cd `app`(customer app), `driver_app`
 2. `flutter pub get`
 3. `flutter run`
+
+**Flutter Apps (Web):**
+Edit the dotenv file in assets folder:
+BASE_URL: `http://{backend IP}:{Port}` or `http://localhost:{Port}`
+DASHBOARD_UPDATE_INTERVAL=`60` (default)
+
+Start App:
+1. cd `admin_web_app`
+2. `flutter pub get`
+3. `flutter run`
+
+or
+
+1. cd `admin_web_app`
+2. `flutter pub get`
+3. `flutter build web`
+4. Create public_web folder in backend
+5. Copy all files in `admin_web_app\build\web` into `backend\public_web`
+6. Web server start automatically when the server start
