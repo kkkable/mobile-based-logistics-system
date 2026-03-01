@@ -4,7 +4,7 @@ An end-to-end logistics platform featuring an intelligent driver-routing algorit
 
 ## Apps Demo
 * **Admin Dashboard (Live Web):** [Link to your Azure VM IP]
-* **Customer App (Android):** [Download CustomerApp.apk](./releases/CustomerApp.apk)
+* **Customer App (Android):** [Download CustomerApp.apk](./releases/download/v1/CustomerApp.apk)
 * **Driver App (Android):** [Download DriverApp.apk](./releases/DriverApp.apk)
 
 ### Test Account
@@ -12,19 +12,19 @@ An end-to-end logistics platform featuring an intelligent driver-routing algorit
 * **Driver:** username: `d4` / password: `4`
 * **Customer:** username: `c5`/ password: `5`
 
-## 🏗️ System Architecture
+## System Architecture
 1.  **Backend:** Node.js, Firebase Firestore (Hosted on Azure Linux VM)
 2.  **Admin Portal:** Flutter Web
 3.  **Customer App:** Flutter Mobile (Android)
 4.  **Driver App:** Flutter Mobile (Android)
 
-## 🚀 Key Features
+## Key Features
 * **Smart Routing:** Uses Google Maps API to calculate the most efficient route for drivers.
 * **Live Tracking:** Customers and Admins can see the driver's live GPS location on a map.
 * **Order Management:** Customers can create orders, and drivers can upload photo proof of delivery.
 * **Admin Control:** View real-time analytics, edit database records, and monitor all drivers concurrently.
 
-## 🛠️ How to run locally (For Developers)
+## How to run locally (For Developers)
 **Backend:**
 Edit the .env file
 1. cd `backend`
