@@ -66,3 +66,8 @@ or
 4. Create public_web folder in backend
 5. Copy all files in `admin_web_app\build\web` into `backend\public_web`
 6. Web server start automatically when the server start
+
+**Create first account:**
+1. edit Admin Creator Script.js with firestore key location, username, password, name
+2. run the script to create first admin account
+3. Use the edit database feature in admin web app to create driver or customer
