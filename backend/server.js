@@ -30,9 +30,6 @@ app.listen(PORT, '0.0.0.0', () => {
 });
 
 // Serve the Admin Web App from public_web folder
-
-// Dynamically serve config.env so it always reflects server environment variables.
-// This avoids needing to manually copy config.env to the Linux VM.
 webApp.get('/assets/dotenv', (req, res) => {
   const baseUrl = process.env.BASE_URL || 'http://localhost:8080';
   const interval = process.env.DASHBOARD_UPDATE_INTERVAL || '60';
@@ -48,4 +45,5 @@ webApp.use((req, res) => {
 const WEB_PORT = 3000;
 webApp.listen(WEB_PORT, '0.0.0.0', () => {
   console.log(`Admin Web App running on port ${WEB_PORT}`);
+
 });
