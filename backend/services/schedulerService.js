@@ -3,7 +3,7 @@ const { allocateOrderToBestDriver } = require('./allocationService');
 const { getTravelTime } = require('../utils');
 
 async function retryPendingAllocations() {
-    console.log(`\n[${new Date().toLocaleTimeString()}] 🔄 Checking for pending orders to allocate...`);
+    console.log(`\n[${new Date().toLocaleTimeString()}] Checking for pending orders to allocate...`);
     
     try {
         // 1. Fetch ALL pending orders
@@ -32,7 +32,7 @@ async function retryPendingAllocations() {
             console.log(`   -> Attempting to allocate Pending Order #${orderId} (Weight: ${order.weight}kg)...`);
 
             if (!order.pickup_coordinate || !order.dropoff_coordinate) {
-                console.error(`      ❌ Skipped Order #${orderId}: Missing coordinates.`);
+                console.error(`  Skipped Order #${orderId}: Missing coordinates.`);
                 continue;
             }
 
@@ -50,11 +50,11 @@ async function retryPendingAllocations() {
             await new Promise((resolve) => {
                 allocateOrderToBestDriver(orderId, pickup, dropoff, weight, (err, result) => {
                     if (err) {
-                        console.error(`      ❌ Allocation error for Order #${orderId}:`, err.message);
+                        console.error(`  Allocation error for Order #${orderId}:`, err.message);
                     } else if (result && result.driverId) {
-                        console.log(`      ✅ Order #${orderId} assigned to Driver ${result.driverId}`);
+                        console.log(`  Order #${orderId} assigned to Driver ${result.driverId}`);
                     } else {
-                        console.log(`      ⚠️ Order #${orderId} could not be assigned (No suitable driver available).`);
+                        console.log(`  Order #${orderId} could not be assigned (No suitable driver available).`);
                     }
                     resolve(); 
                 });
@@ -63,12 +63,12 @@ async function retryPendingAllocations() {
         console.log("   -> Pending allocation cycle finished.\n");
 
     } catch (err) {
-        console.error("❌ Error in retryPendingAllocations:", err);
+        console.error("Error in retryPendingAllocations:", err);
     }
 }
 
 async function updateAllDriverRatings() {
-    console.log("🔄 Starting scheduled driver rating update...");
+    console.log("Starting scheduled driver rating update...");
     try {
         const driversSnapshot = await db.collection('drivers').get();
         
@@ -99,9 +99,9 @@ async function updateAllDriverRatings() {
                 avg_rating: parseFloat(newAvg.toFixed(2))
             });
         }
-        console.log("✅ Driver ratings updated successfully.");
+        console.log("Driver ratings updated successfully.");
     } catch (error) {
-        console.error("❌ Error updating driver ratings:", error);
+        console.error("Error updating driver ratings:", error);
     }
 }
 
