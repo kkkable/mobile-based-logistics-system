@@ -15,14 +15,14 @@ async function allocateOrderToBestDriver(orderId, pickupCoord, dropoffCoord, wei
              }
         }
 
-        // Fetch all drivers
+        // Fetch drivers
         const driversSnapshot = await db.collection('drivers').get();
         
         let bestDriver = null;
         let bestScore = Infinity; 
         let bestPlan = null; 
 
-        // 1. Collect all driver's route
+        // 1. Collect all IDs from every driver route to fetch order data
         let allOrderIds = new Set();
         driversSnapshot.docs.forEach(doc => {
             const d = doc.data();
@@ -35,7 +35,7 @@ async function allocateOrderToBestDriver(orderId, pickupCoord, dropoffCoord, wei
             }
         });
 
-        // 2. Fetch those specific orders
+        // 2.Fetch those specific orders
         const ordersMap = {};
         const allOrdersSnap = await db.collection('orders').where('status', '!=', 'finished').get();
 
@@ -45,23 +45,24 @@ async function allocateOrderToBestDriver(orderId, pickupCoord, dropoffCoord, wei
                 ordersMap[d.id] = {
                     P: { lat: data.pickup_coordinate.latitude, lng: data.pickup_coordinate.longitude },
                     D: { lat: data.dropoff_coordinate.latitude, lng: data.dropoff_coordinate.longitude },
-                    weight: parseFloat(data.weight) || 0
+                    weight: parseFloat(data.weight) || 0 // FIX 1: Force numeric
                 };
             }
         });
 
-        // 3. Add the NEW order
-        ordersMap[orderId] = { P: pickupCoord, D: dropoffCoord, weight: weight };
+        // 3.Add the NEW order
+        const safeWeight = parseFloat(weight) || 0;
+        ordersMap[orderId] = { P: pickupCoord, D: dropoffCoord, weight: safeWeight };
 
-        console.log(`\n=== STARTING ALLOCATION FOR ORDER ${orderId} (Weight: ${weight}kg) ===`);
+        console.log(`\n=== STARTING ALLOCATION FOR ORDER ${orderId} (Weight: ${safeWeight}kg) ===`);
 
-        // local cache for google api call
+        // Local cache for Google Maps API
         const distanceCache = {};
 
         async function getCachedTravelTime(origin, dest) {
             const key = `${origin.lat},${origin.lng}-${dest.lat},${dest.lng}`;
             if (distanceCache[key] !== undefined) {
-                return distanceCache[key];
+                return distanceCache[key]; 
             }
             const duration = await getTravelTime(origin, dest);
             distanceCache[key] = duration; 
@@ -71,10 +72,8 @@ async function allocateOrderToBestDriver(orderId, pickupCoord, dropoffCoord, wei
         for (const doc of driversSnapshot.docs) {
             const driver = { id: parseInt(doc.id, 10), ...doc.data() };
             
-            // filter: skip all driver that is off shift
-
+            // Shift Time Filter
             const workingTimeParts = driver.working_time ? driver.working_time.split('-') : ["09:00", "18:00"];
-            
             const [startH, startM] = workingTimeParts[0].trim().split(':').map(Number);
             const shiftStartTime = new Date();
             shiftStartTime.setHours(startH, startM, 0, 0);
@@ -86,16 +85,29 @@ async function allocateOrderToBestDriver(orderId, pickupCoord, dropoffCoord, wei
             const currentTime = Date.now();
             
             if (currentTime < shiftStartTime.getTime() || currentTime > shiftEndTime.getTime()) {
-                console.log(`\n[Skipping] Driver ${driver.id} (${driver.name}) | Off-shift (Hours: ${driver.working_time})`);
                 continue; 
             }
 
             console.log(`\nChecking Driver ${driver.id} (${driver.name}) | Shift: ${driver.working_time}`);
 
-            const maxWeight = driver.max_weight || 50;
+            const maxWeight = parseFloat(driver.max_weight);
             const currentRoute = (driver.expected_route || []).filter(node => node !== "");
             const currentTimes = (driver.expected_time && driver.expected_time.length > 0) ? driver.expected_time : [];
             const driverLoc = { lat: driver.current_lat || 22.3193, lng: driver.current_lng || 114.1694 };
+
+            let currentLoad = 0;
+            for (const node of currentRoute) {
+                const type = node.charAt(0);
+                const nodeData = ordersMap[node.substring(1)];
+                if (nodeData) {
+                    // If D is in the route, the item is currently on the truck OR will be picked up
+                    if (type === 'D') currentLoad += parseFloat(nodeData.weight) || 0;
+                    // If P is in the route, the item is NOT on the truck yet
+                    if (type === 'P') currentLoad -= parseFloat(nodeData.weight) || 0;
+                }
+            }
+            const initialTestCap = maxWeight - currentLoad;
+
 
             // --- INSERTION HEURISTIC ---
             const N = currentRoute.length;
@@ -109,12 +121,9 @@ async function allocateOrderToBestDriver(orderId, pickupCoord, dropoffCoord, wei
                     candidateRoute.splice(i, 0, `P${orderId}`);
                     candidateRoute.splice(j, 0, `D${orderId}`); 
 
-
-                    // filter: capacity check
-
                     let validCap = true;
-                    let testCap = maxWeight;
-                    let tempWeights = [maxWeight]; 
+                    let testCap = initialTestCap;
+                    let tempWeights = [initialTestCap]; 
                     
                     for (const node of candidateRoute) {
                         const type = node.charAt(0);
@@ -122,8 +131,12 @@ async function allocateOrderToBestDriver(orderId, pickupCoord, dropoffCoord, wei
                         
                         if (!nodeData) { validCap = false; break; }
 
-                        if (type === 'P') testCap -= nodeData.weight;
-                        else testCap += nodeData.weight;
+                        const nodeWeight = parseFloat(nodeData.weight) || 0;
+
+                        if (type === 'P') testCap -= nodeWeight;
+                        else testCap += nodeWeight;
+
+                        if (testCap > maxWeight) testCap = maxWeight;
 
                         if (testCap < 0) {
                             console.log(`  [Skipped] Route P@${i}, D@${j} | Reason: Overcapacity`);
@@ -135,8 +148,6 @@ async function allocateOrderToBestDriver(orderId, pickupCoord, dropoffCoord, wei
 
                     if (!validCap) continue; 
 
-
-                    // time calculation
                     let validTime = true;
                     let tempTimes = [];
                     let lastLoc = driverLoc;
@@ -148,6 +159,7 @@ async function allocateOrderToBestDriver(orderId, pickupCoord, dropoffCoord, wei
                         const type = node.charAt(0);
                         const nodeData = ordersMap[node.substring(1)];
                         const targetLoc = type === 'P' ? nodeData.P : nodeData.D;
+                        
                         const duration = await getCachedTravelTime(lastLoc, targetLoc);
                         
                         simAccumulatedTime += (duration * 1000) + (300 * 1000); 
@@ -156,7 +168,6 @@ async function allocateOrderToBestDriver(orderId, pickupCoord, dropoffCoord, wei
                     }
                     
                     if (simAccumulatedTime > shiftEndTime.getTime() || simAccumulatedTime < shiftStartTime.getTime()) {
-                         console.log(`  [Skipped] Route P@${i}, D@${j} | Reason: Late (Finish: ${new Date(simAccumulatedTime).toLocaleTimeString()})`);
                          continue; 
                     }
 
@@ -166,13 +177,11 @@ async function allocateOrderToBestDriver(orderId, pickupCoord, dropoffCoord, wei
                     const penaltyTime = newEndTime - oldEndTime;
                     
                     const wTime = 1.0;
-                    const wRating = 60000 * 5; // 5 mins per star
+                    const wRating = 60000 * 5; 
                     const rating = driver.avg_rating || 0;
                     
                     const score = (wTime * penaltyTime) - (wRating * rating);
-
                     console.log(`  [Valid]   Route P@${i}, D@${j} | Penalty: ${(penaltyTime/60000).toFixed(1)}m | Score: ${score.toFixed(0)}`);
-
                     if (score < minPenaltyForDriver) {
                         minPenaltyForDriver = score;
                         bestPlanForDriver = {
