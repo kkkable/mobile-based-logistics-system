@@ -609,6 +609,11 @@ class _OrdersViewState extends State<OrdersView> {
                       itemCount: orderController.orders.length,
                       itemBuilder: (context, index) {
                         final order = orderController.orders[index];
+                        bool isPickedUp = !_routeStops.any((stop) => 
+                            stop['orderId'].toString() == order.orderId.toString() && 
+                            stop['type'] == 'pickup'
+                        );
+
                         return Card(
                           margin: const EdgeInsets.all(8),
                           child: ListTile(
@@ -627,8 +632,8 @@ class _OrdersViewState extends State<OrdersView> {
                             isThreeLine: true,
                             trailing: order.status != 'finished'
                                 ? ElevatedButton(
-                                    onPressed: () => _finishOrder(order),
-                                    child: const Text('Finish'),
+                                    onPressed: isPickedUp ? () => _finishOrder(order) : null, 
+                                    child: Text(isPickedUp ? 'Finish' : 'Require PickUp'),
                                   )
                                 : null,
                           ),
