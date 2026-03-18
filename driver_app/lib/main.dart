@@ -82,7 +82,11 @@ class _DriverLoginFormState extends State<DriverLoginForm> {
       final response = await http.post(
         Uri.parse('$baseUrl/api/login'), 
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'username': username, 'password': password}),
+        body: jsonEncode({
+          'username': username,
+          'password': password,
+          'role': 'driver',
+        }),
       );
 
       if (response.statusCode == 200) {
