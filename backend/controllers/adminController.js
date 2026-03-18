@@ -492,7 +492,6 @@ exports.deleteRecord = async (req, res) => {
     if (!validTables.includes(table)) return res.status(400).json({ error: `Invalid table: ${table}` });
 
     try {
-        // ✅ 1. Special Logic for Orders (Cleanup Driver Route)
         if (table === 'orders') {
             const orderDoc = await db.collection('orders').doc(id).get();
             
@@ -536,28 +535,22 @@ exports.deleteRecord = async (req, res) => {
                     console.log(`Cleaned up route for driver ${driverId} after deleting order ${id}`);
                 }
             }
-            // 執行刪除
             await db.collection('orders').doc(id).delete();
             return res.json({ message: 'Order deleted and driver route cleaned up.' });
         } 
         
-        // ✅ 2. Special Logic for Ratings (Find & Delete in Sub-collection)
         else if (table === 'ratings') {
-            // 必須先找到它在哪個司機底下
             const snapshot = await db.collectionGroup('ratings').get();
             const doc = snapshot.docs.find(d => d.id === id);
 
             if (doc) {
-                // 使用找到的 reference 進行刪除
                 await doc.ref.delete();
-                // (可選) 這裡可以呼叫 updateAllDriverRatings() 來更新平均分
                 return res.json({ message: 'Rating deleted successfully' });
             } else {
                 return res.status(404).json({ error: 'Rating not found' });
             }
         }
 
-        // ✅ 3. Generic Delete for others (customers, drivers, admins)
         await db.collection(table).doc(id).delete();
         res.json({ message: 'Record deleted successfully' });
 
