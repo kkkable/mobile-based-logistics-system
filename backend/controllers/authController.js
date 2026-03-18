@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { db } = require('../config');
+const { db, admin } = require('../config');
 const { getNextSequenceValue } = require('../utils');
 const { JWT_SECRET } = require('../middlewares');
 
