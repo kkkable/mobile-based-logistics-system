@@ -10,7 +10,11 @@ class LoginRepository {
       final response = await http.post(
         Uri.parse('$_baseUrl/api/login'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'username': username, 'password': password}),
+        body: jsonEncode({
+          'username': username,
+          'password': password,
+          'role': 'admin',
+        }),
       );
 
       if (response.statusCode == 200) {
