@@ -431,7 +431,7 @@ exports.createRecord = async (req, res) => {
     // --- GENERIC LOGIC for other tables (Customers, Drivers, Admins) ---
     try {
       const idFieldMap = {
-        customers: 'customer_id', // ✅ FIX: Change 'user_id' to 'customer_id'
+        customers: 'customer_id',
         drivers: 'driver_id',
         admins: 'admin_id',
         ratings: 'rating_id', 
