@@ -18,7 +18,6 @@ exports.register = async (req, res) => {
 
         const newUserId = await getNextSequenceValue('customer_id');
         const hashedPassword = await bcrypt.hash(password, 10);
-
         await usersRef.doc(String(newUserId)).set({
         name,
         email,
@@ -37,45 +36,48 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, role } = req.body;
     try {
-      // Check Customers collection
-      const userSnapshot = await db.collection('customers').where('username', '==', username).limit(1).get();
-      if (!userSnapshot.empty) {
-        const userDoc = userSnapshot.docs[0];
-        const user = userDoc.data();
-        const match = await bcrypt.compare(password, user.password);
-        if (match) {
-          const userId = parseInt(userDoc.id, 10);
-          const token = jwt.sign({ id: userId, type: 'user' }, JWT_SECRET, { expiresIn: '1h' });
-          return res.status(200).json({ message: 'Login successful', userId: userId, token });
-        }
-      }
-  
-      // Check Drivers collection
-      const driverSnapshot = await db.collection('drivers').where('username', '==', username).limit(1).get();
-      if (!driverSnapshot.empty) {
-        const driverDoc = driverSnapshot.docs[0];
-        const driver = driverDoc.data();
-        const match = await bcrypt.compare(password, driver.password);
-        if (match) {
-          const driverId = parseInt(driverDoc.id, 10);
-          const token = jwt.sign({ id: driverId, type: 'driver' }, JWT_SECRET, { expiresIn: '1h' });
-          return res.status(200).json({ message: 'Login successful', driverId: driverId, token });
-        }
-      }
+      const normalizedRole = typeof role === 'string' ? role.trim().toLowerCase() : null;
+      const loginTargets = {
+        user: { collection: 'customers', type: 'user', idField: 'userId' },
+        driver: { collection: 'drivers', type: 'driver', idField: 'driverId' },
+        admin: { collection: 'admins', type: 'admin', idField: 'adminId' }
+      };
 
-      // Check Admins collection
-      const adminSnapshot = await db.collection('admins').where('username', '==', username).limit(1).get();
-      if (!adminSnapshot.empty) {
-        const adminDoc = adminSnapshot.docs[0];
-        const adminData = adminDoc.data();
-        const match = await bcrypt.compare(password, adminData.password);
-        if (match) {
-            const adminId = parseInt(adminDoc.id, 10);
-            const token = jwt.sign({ id: adminId, type: 'admin', admin_id: adminId }, JWT_SECRET, { expiresIn: '1h' });
-            return res.status(200).json({ message: 'Login successful', adminId: adminId, token });
-        }
+      const targets = loginTargets[normalizedRole]
+        ? [loginTargets[normalizedRole]]
+        : [loginTargets.user, loginTargets.driver, loginTargets.admin];
+
+      for (const target of targets) {
+        const snapshot = await db.collection(target.collection)
+          .where('username', '==', username)
+          .limit(1)
+          .get();
+
+        if (snapshot.empty) continue;
+
+        const doc = snapshot.docs[0];
+        const account = doc.data();
+
+        // Skip malformed records instead of crashing login flow
+        if (!account || !account.password) continue;
+
+        const match = await bcrypt.compare(password, account.password);
+        if (!match) continue;
+
+        const accountId = parseInt(doc.id, 10);
+        const jwtPayload = target.type === 'admin'
+          ? { id: accountId, type: target.type, admin_id: accountId }
+          : { id: accountId, type: target.type };
+
+        const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: '1h' });
+        return res.status(200).json({
+          message: 'Login successful',
+          accountType: target.type,
+          [target.idField]: accountId,
+          token
+        });
       }
   
       return res.status(401).json({ message: 'Invalid credentials' });
