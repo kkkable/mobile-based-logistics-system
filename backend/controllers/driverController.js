@@ -21,7 +21,6 @@ exports.getDriverDetails = async (req, res) => {
     if (String(req.user.id) != driverId || req.user.type !== 'driver') {
         return res.status(403).json({ error: 'Unauthorized' });
     }
-
     try {
         const doc = await db.collection('drivers').doc(driverId).get();
         if (doc.exists) {
