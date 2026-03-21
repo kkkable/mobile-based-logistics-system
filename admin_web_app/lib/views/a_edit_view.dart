@@ -436,14 +436,22 @@ class _EditViewState extends State<EditView> {
     switch (_selectedAction) {
       case 'add':
         _addFormControllers.forEach((key, controller) {
-          dataPayload[key] = controller.text;
+          if (key == 'user_id') {
+            dataPayload[key] = int.tryParse(controller.text) ?? controller.text;
+          } else {
+            dataPayload[key] = controller.text;
+          }
         });
         content = _buildConfirmationContent('Add this record?', {'New Data': dataPayload});
         break;
       case 'edit':
         for (var field in _editFields) {
           if (field.key != null && field.controller.text.isNotEmpty) {
-            dataPayload[field.key!] = field.controller.text;
+            if (field.key == 'user_id') {
+              dataPayload[field.key!] = int.tryParse(field.controller.text) ?? field.controller.text;
+            } else {
+              dataPayload[field.key!] = field.controller.text;
+            }
           }
         }
         if (dataPayload.isEmpty) {
