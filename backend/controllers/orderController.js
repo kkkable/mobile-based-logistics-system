@@ -147,9 +147,8 @@ exports.submitRating = async (req, res) => {
             return res.status(400).json({ error: 'Order has already been rated.' });
         }
 
-        // 2. Create rating
+        // 2.Create rating
         const newRatingId = await getNextSequenceValue('rating_id'); 
-        
         await db.collection('drivers').doc(String(driver_id)).collection('ratings').doc(String(newRatingId)).set({
             order_id,
             customer_id: req.user.id,
