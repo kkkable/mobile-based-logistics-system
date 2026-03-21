@@ -4,8 +4,8 @@ An end-to-end logistics platform featuring an intelligent driver-routing algorit
 
 ## Apps Demo
 * **Admin Dashboard (Live Web):** [Web Demo](http://20.2.65.194:3000/)
-* **Customer App (Android):** [Download CustomerApp.apk](https://github.com/kkkable/mobile-based-logistics-system/releases/download/v1/CustomerApp.apk)
-* **Driver App (Android):** [Download DriverApp.apk](https://github.com/kkkable/mobile-based-logistics-system/releases/download/v1/DriverApp.apk)
+* **Customer App (Android):** [Download CustomerApp.apk](https://github.com/kkkable/mobile-based-logistics-system/releases/download/v1/CustomerAppv2.apk)
+* **Driver App (Android):** [Download DriverApp.apk](https://github.com/kkkable/mobile-based-logistics-system/releases/download/v1/DriverAppv3.apk)
 
 ### Test Account
 * **Admin:** username: `a1` / password: `1`
