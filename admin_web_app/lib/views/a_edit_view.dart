@@ -551,9 +551,9 @@ class _EditViewState extends State<EditView> {
         ];
       case 'orders':
         if (forEdit) {
-           return ['user_id', 'driver_id', 'status', 'pickup_location', 'dropoff_location', 'weight'];
+           return ['user_id'];
         } else {
-           return ['user_id', 'pickup_location', 'dropoff_location', 'weight'];
+           return ['user_id'];
         }
       default:
         return [];
