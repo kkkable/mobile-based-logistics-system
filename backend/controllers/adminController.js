@@ -514,15 +514,45 @@ exports.deleteRecord = async (req, res) => {
                         let oldWeights = dData.available_weight || [];
                         let oldTimes = dData.expected_time || [];
 
-                        let newRoute = [];
-                        let newWeights = [];
-                        let newTimes = [];
+                        // 1.Calculate the weight change for every existing node
+                        let nodeWeightChanges = {};
+                        for (let i = 0; i < oldRoute.length; i++) {
+                            if (i + 1 < oldWeights.length) {
+                                nodeWeightChanges[oldRoute[i]] = oldWeights[i + 1] - oldWeights[i];
+                            }
+                        }
 
+                        // 2.Filter the route and times array
+                        let newRoute = [];
+                        let newTimes = [];
                         for (let i = 0; i < oldRoute.length; i++) {
                             if (oldRoute[i] !== pNode && oldRoute[i] !== dNode) {
                                 newRoute.push(oldRoute[i]);
-                                if (i < oldWeights.length) newWeights.push(oldWeights[i]);
-                                if (i < oldTimes.length) newTimes.push(oldTimes[i]);
+                                if (i < oldTimes.length) {
+                                    newTimes.push(oldTimes[i]);
+                                }
+                            }
+                        }
+
+                        // 3. Recalculate the available_weight array
+                        let newWeights = [];
+                        if (oldWeights.length > 0) {
+                            let currentCap = oldWeights[0];
+                            if (oldRoute.includes(dNode) && !oldRoute.includes(pNode)) {
+                                const deletedWeight = orderData.weight ? parseFloat(orderData.weight) : 0;
+                                currentCap += deletedWeight;
+                                
+                                const maxWeight = dData.max_weight ? parseFloat(dData.max_weight) : 50;
+                                if (currentCap > maxWeight) currentCap = maxWeight;
+                            }
+
+                            newWeights.push(currentCap);
+
+                            for (let i = 0; i < newRoute.length; i++) {
+                                let node = newRoute[i];
+                                let delta = nodeWeightChanges[node] || 0;
+                                currentCap += delta;
+                                newWeights.push(currentCap);
                             }
                         }
 
