@@ -34,6 +34,7 @@ Edit the .env file:
 5. ETA_UPDATE_INTERVAL_SECONDS=`900` (default)
 6. JWT_SECRET=  (Optional)
 
+Then, create a folder "firebase_key" in the backend folder. Put the Firestore key inside this folder.
 Start Backend:
 1. cd `backend`
 2. `npm install`
