@@ -45,7 +45,6 @@ class _MasterMapViewState extends State<MasterMapView> {
   }
 
   Future<void> _loadMapScript() async {
-    // check if loaded
     if (_isMapsFullyLoaded()) {
       setState(() { _scriptLoaded = true; _isLoading = false; });
       _startLiveTracking();
@@ -319,7 +318,7 @@ class _MasterMapViewState extends State<MasterMapView> {
     }).join(', ');
 
     return GestureDetector(
-      onTap: () {}, // block click through
+      onTap: () {},
       child: Container(
         width: 320,
         padding: const EdgeInsets.all(16),
