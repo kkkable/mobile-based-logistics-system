@@ -323,7 +323,6 @@ exports.getAllRecords = async (req, res) => {
             return res.json(items);
         }
 
-        // Standard logic for root collections
         const snapshot = await db.collection(collectionName).get();
         const items = snapshot.docs.map(doc => ({ ...doc.data(), id: parseInt(doc.id, 10) }));
         res.json(items);
