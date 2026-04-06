@@ -7,7 +7,7 @@ class Driver {
 
   factory Driver.fromJson(Map<String, dynamic> json) {
     return Driver(
-      driverId: json['driver_id'] ?? 0, // Fallback if missing
+      driverId: json['driver_id'] ?? 0,
       name: json['name'] ?? 'Unknown Driver',
       avgRating: (json['avg_rating'] is String)
           ? double.tryParse(json['avg_rating']) ?? 0.0
