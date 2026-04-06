@@ -162,7 +162,6 @@ exports.submitRating = async (req, res) => {
     } catch (err) {
         if (err.message.includes('counters')) {
             try {
-                // Fallback logic
                 const fallbackId = Date.now().toString();
                 await db.collection('drivers').doc(String(driver_id)).collection('ratings').doc(fallbackId).set({
                     order_id, 
