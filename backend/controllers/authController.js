@@ -60,7 +60,6 @@ exports.login = async (req, res) => {
         const doc = snapshot.docs[0];
         const account = doc.data();
 
-        // Skip malformed records instead of crashing login flow
         if (!account || !account.password) continue;
 
         const match = await bcrypt.compare(password, account.password);
