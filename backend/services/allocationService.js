@@ -45,7 +45,7 @@ async function allocateOrderToBestDriver(orderId, pickupCoord, dropoffCoord, wei
                 ordersMap[d.id] = {
                     P: { lat: data.pickup_coordinate.latitude, lng: data.pickup_coordinate.longitude },
                     D: { lat: data.dropoff_coordinate.latitude, lng: data.dropoff_coordinate.longitude },
-                    weight: parseFloat(data.weight) || 0 // FIX 1: Force numeric
+                    weight: parseFloat(data.weight) || 0
                 };
             }
         });
